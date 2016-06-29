@@ -18,13 +18,16 @@ module Oxidized
               'Model'   => @node.model }
       opt['Output_log'] = Oxidized::Config::Log + "-#{@node.ip}-telnet" if Oxidized.config.input.debug?
 
+      Oxidized.logger.debug "Initializing telnet connection"
       @telnet  = Net::Telnet.new opt
       if @node.auth[:username] and @node.auth[:username].length > 0
         expect username
         @telnet.puts @node.auth[:username]
       end
-      expect password
-      @telnet.puts @node.auth[:password]
+      if @node.auth[:password] and @node.auth[:password].length > 0
+        expect password
+        @telnet.puts @node.auth[:password]
+      end
       begin
         expect @node.prompt
       rescue Timeout::Error
@@ -75,6 +78,8 @@ class Net::Telnet
   ## FIXME: we also need output (not sure I'm going to support this)
   attr_reader :output
   def waitfor(options) # :yield: recvdata
+    Oxidized.logger.debug "Telnet: waiting for something"
+
     time_out = @options["Timeout"]
     waittime = @options["Waittime"]
     fail_eof = @options["FailEOF"]
@@ -103,11 +108,14 @@ class Net::Telnet
     buf = ''
     rest = ''
     until(prompt === line and not IO::select([@sock], nil, nil, waittime))
+      Oxidized.logger.debug "Telnet: in the loop"
       unless IO::select([@sock], nil, nil, time_out)
         raise TimeoutError, "timed out while waiting for more data"
       end
       begin
+        Oxidized.logger.debug "Telnet: got some data"
         c = @sock.readpartial(1024 * 1024)
+        Oxidized.logger.debug c.inspect
         @output = c
         @dumplog.log_dump('<', c) if @options.has_key?("Dump_log")
         if @options["Telnetmode"]
@@ -143,6 +151,15 @@ class Net::Telnet
         line += buf
         line = model.expects line
         line = yield line if block_given?
+        Oxidized.logger.debug "Telnet: line to match"
+        Oxidized.logger.debug line.inspect
+        Oxidized.logger.debug "Telnet: regexp of prompt"
+        Oxidized.logger.debug prompt.inspect
+        if prompt === line
+          Oxidized.logger.debug "Telnet: It matched!!!"
+        else 
+          Oxidized.logger.debug "Telnet: It did NOT match!!!"
+        end
         yield buf if block_given?
       rescue EOFError # End of file reached
         raise if fail_eof
