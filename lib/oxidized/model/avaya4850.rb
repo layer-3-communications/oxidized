@@ -1,6 +1,4 @@
-class Avaya470 < Oxidized::Model
-  # prompt /^\s*470-48T[>#]$/m
-  # prompt /^\s*(NSA|NSH|IDF|SW_|NSF).*[^ ][>#]$/m
+class Avaya4850 < Oxidized::Model
   prompt /^\s*[-a-zA-Z0-9_() ]+\S[>#]$/
   comment '! '
 
@@ -31,19 +29,9 @@ class Avaya470 < Oxidized::Model
   cmd 'show running-config' do |cfg|
     cfg
   end
-  # cmd 'exit' do |cfg|
-  #   ''
-  # end
 
-  cfg :telnet do
-    username /Enter Username:/
-    password /Enter Password:/
-    post_login 'enable'
-    pre_logout 'l'
-  end
   cfg :ssh do
     post_login 'enable'
     pre_logout 'exit'
   end
-
 end

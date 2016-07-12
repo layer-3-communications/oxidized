@@ -1,7 +1,5 @@
-class Avaya470 < Oxidized::Model
-  # prompt /^\s*470-48T[>#]$/m
-  # prompt /^\s*(NSA|NSH|IDF|SW_|NSF).*[^ ][>#]$/m
-  prompt /^\s*[-a-zA-Z0-9_() ]+\S[>#]$/
+class Avaya5698 < Oxidized::Model
+  prompt /^\s*(NSA|NSH|IDF|SW_|NSF).*[^ ][>#]$/m
   comment '! '
 
   expect /^.*Enter Ctrl-Y to begin.*\*{62}.*\*{62}.*$/ do |data,re|
@@ -9,7 +7,7 @@ class Avaya470 < Oxidized::Model
     send "\C-y"
     ''
   end
-  expect /^.*Ethernet Switch \S+ Main Menu.*ogout.*select option.*25l$/ do |data,re|
+  expect /^.*Ethernet Routing Switch 5698TFD(-PWR)? Main Menu.*ogout.*select option.*25l$/ do |data,re|
     sleep 1.0
     send "c"
     data.gsub re, ''
@@ -31,19 +29,12 @@ class Avaya470 < Oxidized::Model
   cmd 'show running-config' do |cfg|
     cfg
   end
-  # cmd 'exit' do |cfg|
-  #   ''
-  # end
+  cmd 'exit' do |cfg|
+    ''
+  end
 
-  cfg :telnet do
-    username /Enter Username:/
-    password /Enter Password:/
+  cfg :ssh do
     post_login 'enable'
     pre_logout 'l'
   end
-  cfg :ssh do
-    post_login 'enable'
-    pre_logout 'exit'
-  end
-
 end

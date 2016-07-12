@@ -2,6 +2,7 @@ module Oxidized
   class Jobs < Array
     AVERAGE_DURATION  = 5   # initially presume nodes take 5s to complete
     MAX_INTER_JOB_GAP = 300 # add job if more than X from last job started
+    MIN_JOBS          = 25  # always run 25 in parallel
     attr_accessor :interval, :max, :want
 
     def initialize max, interval, nodes
@@ -35,6 +36,7 @@ module Oxidized
     def new_count
       @want = ((@nodes.size * @duration) / @interval).ceil
       @want = 1 if @want < 1
+      @want = MIN_JOBS if @want < MIN_JOBS
       @want = @nodes.size if @want > @nodes.size
       @want = @max if @want > @max
     end

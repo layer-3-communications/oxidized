@@ -1,4 +1,4 @@
-class Avaya470 < Oxidized::Model
+class Avaya4 < Oxidized::Model
   # prompt /^\s*470-48T[>#]$/m
   # prompt /^\s*(NSA|NSH|IDF|SW_|NSF).*[^ ][>#]$/m
   prompt /^\s*[-a-zA-Z0-9_() ]+\S[>#]$/
@@ -25,6 +25,9 @@ class Avaya470 < Oxidized::Model
   cmd 'terminal length 0' do |cfg|
     comment cfg
   end
+  cmd 'show autotopology nmm-table' do |cfg|
+    comment cfg
+  end
   cmd 'show system verbose' do |cfg|
     comment cfg
   end
@@ -39,7 +42,7 @@ class Avaya470 < Oxidized::Model
     username /Enter Username:/
     password /Enter Password:/
     post_login 'enable'
-    pre_logout 'l'
+    pre_logout "exit\nl"
   end
   cfg :ssh do
     post_login 'enable'
